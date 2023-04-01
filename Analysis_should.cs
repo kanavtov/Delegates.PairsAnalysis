@@ -18,10 +18,17 @@ namespace Delegates.PairsAnalysis
             Assert.AreEqual(expectedIndex, actualIndex);
         }
 
+        [TestCase(3, new[] { 1, 2, 3, 5, 8, 9 })]
+        public void FindMaxPeriodIndex_ProcessIntCorrectly(int expectedIndex, int[] array)
+        {
+            var actualIndex = Analysis.FindMaxPeriodIndex(array);
+            Assert.AreEqual(expectedIndex, actualIndex);
+        }
+
         [Test]
         public void FindMaxPeriodIndex_ThrowsAtEmptyCollection()
         {
-            Assert.Throws(typeof(InvalidOperationException), () => Analysis.FindMaxPeriodIndex());
+            Assert.Throws(typeof(InvalidOperationException), () => Analysis.FindMaxPeriodIndex(new DateTime()));
         }
 
         [Test]
