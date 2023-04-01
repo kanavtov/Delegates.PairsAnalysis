@@ -19,7 +19,7 @@ namespace Delegates.PairsAnalysis
             }
         }
 
-        public static int IndexMaxLen<T>(this IEnumerable<T> collection, Func<T, double> process)
+        public static int MaxIndex<T>(this IEnumerable<T> collection, Func<T, double> process)
         {
             return collection.Select((a, index) => new { a, index }).Where(b => process(b.a) ==
                 collection.Select(c => process(c)).Max()).Select(d => d.index).First();
@@ -28,7 +28,7 @@ namespace Delegates.PairsAnalysis
         public static int FindMaxPeriodIndex(params DateTime[] data)
         {
             Func<Tuple<DateTime, DateTime>, double> process = source => (source.Item2 - source.Item1).TotalSeconds;
-            var query = data.Pairs().IndexMaxLen(process);
+            var query = data.Pairs().MaxIndex(process);
             return query;
         }
 
