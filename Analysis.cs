@@ -19,16 +19,24 @@ namespace Delegates.PairsAnalysis
             }
         }
 
-        public static int MaxIndex<T>(this IEnumerable<T> collection, Func<T, double> process)
+        public static int MaxIndex<T>(this IEnumerable<T> collection)
         {
-            return collection.Select((a, index) => new { a, index }).Where(b => process(b.a) ==
-                collection.Select(c => process(c)).Max()).Select(d => d.index).First();
+            return collection.Select((a, index) => (a, index)).Max().index;
+        }
+
+        public static IEnumerable<double> Difference(this IEnumerable<Tuple<DateTime, DateTime>> collection)
+        {
+            return collection.Select(a => (a.Item2 - a.Item1).TotalSeconds);
+        }
+
+        public static IEnumerable<int> Difference(this IEnumerable<Tuple<int, int>> collection)
+        {
+            return collection.Select(a => (a.Item2 - a.Item1));
         }
 
         public static int FindMaxPeriodIndex(params DateTime[] data)
         {
-            Func<Tuple<DateTime, DateTime>, double> process = source => (source.Item2 - source.Item1).TotalSeconds;
-            var query = data.Pairs().MaxIndex(process);
+            var query = data.Pairs().Difference().MaxIndex();
             return query;
         }
 
