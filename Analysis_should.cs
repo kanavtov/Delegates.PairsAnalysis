@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Delegates.PairsAnalysis
 {
@@ -15,13 +16,6 @@ namespace Delegates.PairsAnalysis
         {
             var parsedDates = dates.Select(d => DateTime.ParseExact(d, "yyyy.MM.dd", CultureInfo.InvariantCulture)).ToArray();
             var actualIndex = Analysis.FindMaxPeriodIndex(parsedDates);
-            Assert.AreEqual(expectedIndex, actualIndex);
-        }
-
-        [TestCase(3, new[] { 1, 2, 3, 5, 8, 9 })]
-        public void FindMaxPeriodIndex_ProcessIntCorrectly(int expectedIndex, int[] array)
-        {
-            var actualIndex = Analysis.FindMaxPeriodIndex(array);
             Assert.AreEqual(expectedIndex, actualIndex);
         }
 
@@ -61,5 +55,33 @@ namespace Delegates.PairsAnalysis
         {
             Assert.Throws(typeof(InvalidOperationException), () => Analysis.FindAverageRelativeDifference(0.1));
         }
+
+        public static int FindMaxPeriodIndex(params int[] data)
+        {
+            var r = data.Pairs();
+            var v = r.MaxIndex();
+            return v;
+        }
+
+        [TestCase(3, new[] { 1, 2, 3, 5, 8, 9 })]
+        public void FindMaxPeriodIndex_ProcessIntCorrectly(int expectedIndex, int[] array)
+        {
+            var actualIndex = FindMaxPeriodIndex(array);
+            Assert.AreEqual(expectedIndex, actualIndex);
+        }
+
+        [Test]
+        public void MaxIndex_EnumerateSequenceOnlyOnce()
+        {
+            Assert.AreEqual(0, FindMaxPeriodIndex(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void MaxIndex_FailsOnEmptySequence()
+        {
+            IEnumerable<int> empty = Enumerable.Empty<int>();
+            Assert.Throws(typeof(InvalidOperationException), () => Analysis.MaxIndex(empty));
+        }
+
     }
 }

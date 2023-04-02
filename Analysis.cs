@@ -14,15 +14,15 @@ namespace Delegates.PairsAnalysis
         //    return collection.Select((a, index) => Tuple.Create(collection.Skip(index + 1).First(), a)).Take(collection.Count() - 1);
         //}
 
-        public static IEnumerable<Tuple<T, T>> _Pairs1<T>(this IEnumerable<T> collection)
-        {
-            T item1 = collection.First();
-            foreach (var item in collection.Skip(1))
-            {
-                yield return Tuple.Create(item1, item);
-                item1 = item;
-            }
-        }
+        //public static IEnumerable<Tuple<T, T>> _Pairs1<T>(this IEnumerable<T> collection)
+        //{
+        //    T item1 = collection.First();
+        //    foreach (var item in collection.Skip(1))
+        //    {
+        //        yield return Tuple.Create(item1, item);
+        //        item1 = item;
+        //    }
+        //}
 
         public static IEnumerable<Tuple<T, T>> Pairs<T>(this IEnumerable<T> collection)
         {
@@ -40,26 +40,27 @@ namespace Delegates.PairsAnalysis
             }
         }
 
-        public static IEnumerable<Tuple<T, T>> Pairs2<T>(this IEnumerable<T> collection)
-        {
-            var index = 0;
-            T item1 = collection.First();
-            foreach (var item in collection)
-            {
-                if(index++ != 0)
-                    yield return Tuple.Create(item1, item);
-                item1 = item;
-            }
-        }
+        //public static IEnumerable<Tuple<T, T>> Pairs2<T>(this IEnumerable<T> collection)
+        //{
+        //    var index = 0;
+        //    T item1 = collection.First();
+        //    foreach (var item in collection)
+        //    {
+        //        if(index++ != 0)
+        //            yield return Tuple.Create(item1, item);
+        //        item1 = item;
+        //    }
+        //}
 
         public static int MaxIndex<T>(this IEnumerable<T> collection, IComparer comparer)
         {
             var index = 0;
             var indexMax = 0;
-            object max = null;
+            T max = default;
             foreach (var item in collection)
             {
-                if (index == 0) max = item;
+                if (index == 0)
+                    max = item;
                 if (comparer.Compare(item, max) > 0) 
                 {
                     indexMax = index;
@@ -72,6 +73,8 @@ namespace Delegates.PairsAnalysis
 
         public static int MaxIndex<T>(this IEnumerable<T> collection)
         {
+            if (collection == Enumerable.Empty<T>())
+                throw new InvalidOperationException();
             IComparer comparer = new ValueComparer<T>();
             return MaxIndex(collection, comparer);
         }
@@ -117,13 +120,6 @@ namespace Delegates.PairsAnalysis
             return v;
         }
 
-        public static int FindMaxPeriodIndex(params int[] data)
-        {
-            var r = data.Pairs();
-            var v = r.MaxIndex();
-            return v;
-        }
-
         public static double FindAverageRelativeDifference(params double[] data)
         {
             var r = data.Pairs();
@@ -133,27 +129,34 @@ namespace Delegates.PairsAnalysis
 
     internal class ValueComparer<T> : IComparer
     {
-        public int Compare1(Tuple<DateTime, DateTime> x, Tuple<DateTime, DateTime> y)
+        public int CompareTupleDate(Tuple<DateTime, DateTime> x, Tuple<DateTime, DateTime> y)
         {
             return (x.Item2 - x.Item1).TotalSeconds.CompareTo((y.Item2 - y.Item1).TotalSeconds);
         }
-        public int Compare2(Tuple<int, int> x, Tuple<int, int> y)
+        public int CompareTupleInt(Tuple<int, int> x, Tuple<int, int> y)
         {
             return (x.Item2 - x.Item1).CompareTo(y.Item2 - y.Item1);
         }
         public int Compare(object x, object y)
         {
-            try
+            Type d1 = typeof(T);
+            if (d1.FullName.Contains("Tuple`2[[System.DateTime"))
             {
                 var f = (Tuple<DateTime, DateTime>)x;
                 var s = (Tuple<DateTime, DateTime>)y;
-                return Compare1(f, s);
+                return CompareTupleDate(f, s);
             }
-            catch
+            else if (d1.FullName.Contains("Tuple`2[[System.Int32"))
             {
                 var f = (Tuple<int, int>)x;
                 var s = (Tuple<int, int>)y;
-                return Compare2(f, s);
+                return CompareTupleInt(f, s);
+            }
+            else
+            {
+                var f = (int)x;
+                var s = (int)y;
+                return f.CompareTo(s);
             }
         }
     }
